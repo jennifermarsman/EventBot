@@ -11,16 +11,16 @@ module.exports = function () {
                     var buttonActions = [];
                     session.privateConversationData.fullBios = [];
                     results.forEach(function (result, i) {
-
+                        if(result.speakerName.toLowerCase() === "chris nicholson")
+                            result.Sessions = "Panel: AI Disruption: Market Opportunities & Threats";
                         //sms has limited experience, so no need for full bio or speaker's event(s) buttons'
                         if (session.message.source !== "sms") {
                             if (result.Sessions && result.Sessions.length > 0 && result.speakerName) {
-                                var firstName = result.speakerName.split(" ")[0];
                                 buttonActions.push(builder.CardAction.imBack(session, result.speakerName + "'s Event(s)", "Speaker's Event(s)"));
-                                if (session.message.source.toLowerCase() === "skype") {
-                                    buttonActions.push(builder.CardAction.imBack(session, result.speakerName + "'s " + "Full Bio", "Full Bio"));
-                                    session.privateConversationData.fullBios.push(result.speakerName + " " + result.Description);
-                                }
+                            }
+                            if (session.message.source.toLowerCase() === "skype" && result.Description.length > 25) {
+                                buttonActions.push(builder.CardAction.imBack(session, result.speakerName + "'s " + "Full Bio", "Full Bio"));
+                                session.privateConversationData.fullBios.push(result.speakerName + " " + result.Description);
                             }
                         }
                         var img = result.imageURL;
@@ -42,10 +42,10 @@ module.exports = function () {
                     if (session.message.source.toLowerCase() == "skype") {
                         session.privateConversationData.fullDescription = [];
 
-                        if (results && results.length === 1){
+                        if (results && results.length === 1) {
                             var buttonActions = [];
-                        buttonActions.push(builder.CardAction.imBack(session, "Full Description", "Full Description"));
-                        session.privateConversationData.fullDescription[0] = results[0].Description;
+                            buttonActions.push(builder.CardAction.imBack(session, "Full Description", "Full Description"));
+                            session.privateConversationData.fullDescription[0] = results[0].Description;
                         }
                     }
 
@@ -69,12 +69,12 @@ module.exports = function () {
                         results.forEach(function (result, i) {
                             if (session.message.source.toLowerCase() === "skype" && results.length > 0 && result.Description.length > 25) {
                                 var buttonAction = [builder.CardAction.imBack(session, "Full Description " + (i + 1), "Full Description " + (i + 1))];
-                                session.privateConversationData.fullDescription[i] = result.Description;
+                                session.privateConversationData.fullDescription[i] = "Speakers: " + result.Speakers + "\n\n" + result.Description;
                             }
                             msg.addAttachment(
                                 new builder.HeroCard(session)
                                     .title(result.Title)
-                                    .subtitle(result.startTime + " to " + result.endTime + " " + result.Speakers + "\n" +
+                                    .subtitle(result.startTime + " to " + result.endTime + " in " + result.Location + " " + result.Speakers + "\n" +
                                     (result.Track.endsWith("Child") ? '' : result.Track + '\n'))
                                     .text(result.Description)
                                     .buttons(buttonAction)
@@ -89,12 +89,12 @@ module.exports = function () {
                     var img = result.imageURL ? result.imageURL : "";
 
                     //Grabs first image if their are multiple
-                    if(img.includes("|")){
+                    if (img.includes("|")) {
                         img = img.split("|")[0];
                     }
                     //Accounts for skype rendering of (c) and (6) 
-                    if (session.message.source.toLowerCase() === "skype" && result && result.Description.length > 25){
-                        var buttonAction = [builder.CardAction.imBack(session, "Full Sponsor Bio" , "Full Bio ")];
+                    if (session.message.source.toLowerCase() === "skype" && result && result.Description.length > 25) {
+                        var buttonAction = [builder.CardAction.imBack(session, "Full Sponsor Bio", "Full Bio ")];
                         result.Description = result.Description.replace("(c)(6)", "(c6)")
                     }
                     session.privateConversationData.fullSponsorBio = result.Description;
